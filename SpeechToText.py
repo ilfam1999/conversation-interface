@@ -20,7 +20,8 @@ class SttIntegrated:
     def __init__(self, file_path):
         self.inputFilePath = file_path
         # Hard-coding the path for credentials file downloaded from Google API dashboard.
-        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "C:\Users\Arda\PycharmProjects\SpeechToText\Test Project-f42fe764138e.json"
+        
+        # os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "C:\Users\Arda\PycharmProjects\SpeechToText\Test Project-f42fe764138e.json"
 
         # fix as necessary
         self.s3_region = "us-east-2"
@@ -107,10 +108,10 @@ class SttIntegrated:
         return
 
     def main(self):
-        google = threading.Thread(name='googleSTT', target= self.google_stt )
+        # google = threading.Thread(name='googleSTT', target= self.google_stt )
         amazon = threading.Thread(name='amazonSTT', target= self.amazon_stt)
 
-        google.start()
+        # google.start()
         amazon.start()
 
 # to run it from console like a simple script use
