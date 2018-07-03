@@ -6,6 +6,7 @@ import webbrowser
 import tornado.web
 import tornado.websocket
 import time
+from SpeechToText import SttIntegrated
 #import methods
 
 def transform(blobUrl):
