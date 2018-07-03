@@ -6,6 +6,7 @@ import webbrowser
 import tornado.web
 import tornado.websocket
 import time
+from SpeechToText import SttIntegrated
 #import methods
 
 def transform(blobUrl):
@@ -16,12 +17,6 @@ def transform(blobUrl):
 	filepath = "/Users/wangruohan/Downloads/" + filename
 	blob = open (filepath, 'rb')
 	os.rename(blob.name, "speech.wav")
-	# TODO
-
-
-
-	testText = {"Amazon": "Amazon transcript finished", "Google": "Google transcript finished"}
-	return testText
 
 class HelloHandler(tornado.web.RequestHandler):
 
