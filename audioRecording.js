@@ -26,9 +26,9 @@ var client = {
 
             // If the response is from "transform", show the text
             } else if (router === "transform") {
-                $("#nav-amazon").html(jsonRpc.result);
-                $("#nav-google").html(jsonRpc.result);
-                $("#nav-ibm").html(jsonRpc.result);
+                $("#nav-amazon").html(jsonRpc.result1);
+                $("#nav-google").html(jsonRpc.result2);
+                // $("#nav-ibm").html(jsonRpc.result);
 
             // If the response is from anything else, it's currently unsupported
             } else {

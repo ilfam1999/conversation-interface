@@ -17,15 +17,6 @@ def transform(blobUrl):
 	filepath = "/Users/wangruohan/Downloads/" + filename
 	blob = open (filepath, 'rb')
 	os.rename(blob.name, "speech.wav")
-	t2s = SttIntegrated("speech.wav")
-    	t2s.main()
-	file_google = open(“speechGoogle.text”, “r”) 
-	google_text = file_google.read()
-	file_amazon = open(“speechAWS.text”, “r”) 
-	amazon_text = file_amazon.read()
-	# text = ""
-	# text = "Bacon ipsum dolor amet beef ribs flank andouille ribeye drumstick, biltong porchetta meatball pork belly swine turducken prosciutto cupim. Cow corned beef beef ham shoulder kielbasa sirloin tongue. Kielbasa rump buffalo strip steak. Flank tri-tip shank corned beef chuck meatball. Short loin tongue frankfurter, rump short ribs jerky kielbasa capicola turducken ham hock meatball. Capicola biltong buffalo meatball sirloin short loin pancetta brisket alcatra jerky frankfurter salami ham hock kielbasa cupim. Cow cupim shankle, shank brisket biltong strip steak corned beef meatloaf salami venison ribeye prosciutto.\n "
-	return filepath
 
 class HelloHandler(tornado.web.RequestHandler):
 
@@ -41,7 +32,11 @@ class WebSocket(tornado.websocket.WebSocketHandler):
         try:
         	# call the method in method.py
             # result = getattr(methods, json_rpc["method"])(**json_rpc["params"])
+
+            # Two results for Amazon and Google
             result = transform(json_rpc["params"])
+            result1 = result["Amazon"]
+            result2 = result["Google"]
             error = None
         except:
             # Errors are handled by enabling the `error` flag and returning a
@@ -50,7 +45,7 @@ class WebSocket(tornado.websocket.WebSocketHandler):
             error = 1
 
         # send respond to the client
-        self.write_message(json.dumps({"result": result, "error": error,
+        self.write_message(json.dumps({"result1": result1, "result2": result2, "error": error,
                                        "id": json_rpc["id"]},
                                       separators=(",", ":")))
 
