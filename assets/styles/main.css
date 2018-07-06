@@ -1,0 +1,28 @@
+body {
+	font-family: "helvetica neue";
+	color: #666;
+	padding: 0 10%;
+}
+
+h1 {
+	font-size: 20px;
+	width: 100%;
+	height: 200px;
+	padding: 50px 20px;
+	font-size: 50px;
+	background: #c21500;  /* fallback for old browsers */
+	background: -webkit-linear-gradient(to left, #ffc500, #c21500);  /* Chrome 10-25, Safari 5.1-6 */
+	background: linear-gradient(to left, #ffc500, #c21500); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+	color: white;
+}
+
+.btn-group-justified {
+	width: 50%;
+	margin: 40px auto;
+	padding: 40px 20px;
+	border: 3px dashed #00aaff;
+}
+
+button {
+	color: blue;
+}

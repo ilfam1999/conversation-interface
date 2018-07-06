@@ -15,13 +15,17 @@ from google.cloud.speech import types
 from google.cloud.storage import Blob
 from google.cloud import storage
 
+from pydub import AudioSegment
+from pydub.utils import which
+
+AudioSegment.converter = which("ffmpeg")
 
 class SttIntegrated:
     def __init__(self, file_path):
         self.inputFilePath = file_path
         # Hard-coding the path for credentials file downloaded from Google API dashboard.
         
-        # os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "C:\Users\Arda\PycharmProjects\SpeechToText\Test Project-f42fe764138e.json"
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/Users/wangruohan/Documents/nlp/88cb41572f69.json"
 
         # fix as necessary
         self.s3_region = "us-east-2"
@@ -30,7 +34,12 @@ class SttIntegrated:
     def google_stt(self):
         # Instantiates a client
         client = speech.SpeechClient()
-
+        
+        sound = AudioSegment.from_file(self.inputFilePath, format="webm")
+        # if(sound.channels != 1):#If it's not mono
+        sound = sound.set_channels(1)#Change it to mono
+        sound.export(self.inputFilePath, format="wav")#Export them as wav files
+        print('Conversion complete')
         # Instantiates a client and uploads file
         storage_client = storage.Client()
         # Parameter is the name of the Google Cloud bucket
@@ -74,6 +83,7 @@ class SttIntegrated:
                         start_time.seconds + start_time.nanos * 1e-9,
                         end_time.seconds + end_time.nanos * 1e-9))
                     output_file.write("\n")
+            output_file.close()
             print("Google: Operation Complete")
             element.delete()
             return
@@ -108,11 +118,11 @@ class SttIntegrated:
         return
 
     def main(self):
-        # google = threading.Thread(name='googleSTT', target= self.google_stt )
-        amazon = threading.Thread(name='amazonSTT', target= self.amazon_stt)
-
-        # google.start()
-        amazon.start()
+        #google = threading.Thread(name='googleSTT', target= self.google_stt )
+        # amazon = threading.Thread(name='amazonSTT', target= self.amazon_stt)
+        SttIntegrated.google_stt(self)
+        #google.start()
+        # amazon.start()
 
 # to run it from console like a simple script use
 if __name__ == "__main__":

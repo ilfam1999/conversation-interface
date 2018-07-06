@@ -11,12 +11,22 @@ from SpeechToText import SttIntegrated
 
 def transform(blobUrl):
 	# Turn audio to text
-	webbrowser.open(blobUrl)
-	time.sleep(3)
-	filename = blobUrl.split('/')[1]
-	filepath = "/Users/wangruohan/Downloads/" + filename
-	blob = open (filepath, 'rb')
-	os.rename(blob.name, "speech.wav")
+    # webbrowser.open(blobUrl)
+    # time.sleep(3)
+    # filename = blobUrl.split('/')[1]
+    # filepath = "/Users/wangruohan/Downloads/" + filename
+    # blob = open (filepath, 'rb')
+    # os.rename(blob.name, "speech.wav")
+
+    t2s = SttIntegrated("speech.webm")
+    t2s.main()
+    file_google = open("speech.Google.txt", "r")
+    google_text = file_google.read()
+    file_google.close()
+    #file_amazon = open("speechAWS.text", "r") 
+    #amazon_text = file_amazon.read()
+    result = {"Amazon": "amazon_text_fake", "Google": google_text}
+    return result
 
 class HelloHandler(tornado.web.RequestHandler):
 
@@ -29,14 +39,14 @@ class WebSocket(tornado.websocket.WebSocketHandler):
         """Evaluates the function pointed to by json-rpc."""
         json_rpc = json.loads(message)
 
+        print(message)
         try:
         	# call the method in method.py
             # result = getattr(methods, json_rpc["method"])(**json_rpc["params"])
 
             # Two results for Amazon and Google
             result = transform(json_rpc["params"])
-            result1 = result["Amazon"]
-            result2 = result["Google"]
+            print("transformed successfully")
             error = None
         except:
             # Errors are handled by enabling the `error` flag and returning a
@@ -45,7 +55,7 @@ class WebSocket(tornado.websocket.WebSocketHandler):
             error = 1
 
         # send respond to the client
-        self.write_message(json.dumps({"result1": result1, "result2": result2, "error": error,
+        self.write_message(json.dumps({"result": result, "error": error,
                                        "id": json_rpc["id"]},
                                       separators=(",", ":")))
 
