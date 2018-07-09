@@ -29,7 +29,7 @@ class SttIntegrated:
 
         # fix as necessary
         self.s3_region = "us-east-2"
-        self.s3_bucket_name = "celerfema"
+        self.s3_bucket_name = "celerfama"
 
     def google_stt(self):
         # Instantiates a client
@@ -73,24 +73,24 @@ class SttIntegrated:
                 for alternative in result.alternatives:
                     output_file.write('Transcript: {}'.format(alternative.transcript.encode("utf-8")) + '\n')
                     output_file.write("Confidence: " + str(alternative.confidence) + '\n')
-                # Below can be uncommented to get the detailed info for each word.
-                for word_info in alternative.words:
-                    word = word_info.word
-                    start_time = word_info.start_time
-                    end_time = word_info.end_time
-                    output_file.write('Word: {}, start_time: {}, end_time: {}'.format(
-                        word,
-                        start_time.seconds + start_time.nanos * 1e-9,
-                        end_time.seconds + end_time.nanos * 1e-9))
-                    output_file.write("\n")
+                # # Below can be commented to get the detailed info for each word.
+                # for word_info in alternative.words:
+                #     word = word_info.word
+                #     start_time = word_info.start_time
+                #     end_time = word_info.end_time
+                #     output_file.write('Word: {}, start_time: {}, end_time: {}'.format(
+                #         word,
+                #         start_time.seconds + start_time.nanos * 1e-9,
+                #         end_time.seconds + end_time.nanos * 1e-9))
+                #     output_file.write("\n")
             output_file.close()
             print("Google: Operation Complete")
             element.delete()
             return
 
     def amazon_stt(self):
-        transcribe = boto3.client('transcribe', aws_access_key_id='AKIAJLGOTV4UNS6NX7CA',
-                                  aws_secret_access_key='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',
+        transcribe = boto3.client('transcribe', aws_access_key_id='AKIAIPLJH4IPQUJ36IBA',
+                                  aws_secret_access_key='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',
                                   region_name='us-east-2')
         ticks = str(time.time())
         job_name = "Transcribing" + self.inputFilePath + ticks
@@ -101,12 +101,14 @@ class SttIntegrated:
             MediaFormat='wav',
             LanguageCode='en-US'
         )
+        print("Amazon:Transcribing " + self.inputFilePath)
+
         while True:
             status = transcribe.get_transcription_job(TranscriptionJobName=job_name)
             if status['TranscriptionJob']['TranscriptionJobStatus'] in ['COMPLETED', 'FAILED']:
                 break
-            print("Amazon: Not ready yet...")
-            time.sleep(5)
+            print("Amazon:  Waiting for operation to complete...")
+            time.sleep(10)
         #print(status)
 
         link = status.get('TranscriptionJob').get('Transcript').get('TranscriptFileUri')
@@ -118,11 +120,12 @@ class SttIntegrated:
         return
 
     def main(self):
-        #google = threading.Thread(name='googleSTT', target= self.google_stt )
-        # amazon = threading.Thread(name='amazonSTT', target= self.amazon_stt)
-        SttIntegrated.google_stt(self)
-        #google.start()
-        # amazon.start()
+        google = threading.Thread(name='googleSTT', target= self.google_stt )
+        amazon = threading.Thread(name='amazonSTT', target= self.amazon_stt)
+        google.start()
+        amazon.start()
+        google.join()
+        amazon.join()
 
 # to run it from console like a simple script use
 if __name__ == "__main__":

@@ -17,15 +17,20 @@ def transform(blobUrl):
     # filepath = "/Users/wangruohan/Downloads/" + filename
     # blob = open (filepath, 'rb')
     # os.rename(blob.name, "speech.wav")
+    time.sleep(3)
+    filepath = "/Users/wangruohan/Downloads/speech.webm"
+    audio_file = open(filepath, 'rb')
+    os.rename(audio_file.name, "speech.webm")
+    audio_file.close()
 
     t2s = SttIntegrated("speech.webm")
     t2s.main()
     file_google = open("speech.Google.txt", "r")
     google_text = file_google.read()
     file_google.close()
-    #file_amazon = open("speechAWS.text", "r") 
-    #amazon_text = file_amazon.read()
-    result = {"Amazon": "amazon_text_fake", "Google": google_text}
+    file_amazon = open("speech.AWS.txt", "r") 
+    amazon_text = file_amazon.read()
+    result = {"Amazon": amazon_text, "Google": google_text}
     return result
 
 class HelloHandler(tornado.web.RequestHandler):
@@ -39,14 +44,14 @@ class WebSocket(tornado.websocket.WebSocketHandler):
         """Evaluates the function pointed to by json-rpc."""
         json_rpc = json.loads(message)
 
+        print("Receive from client:")
         print(message)
         try:
         	# call the method in method.py
             # result = getattr(methods, json_rpc["method"])(**json_rpc["params"])
 
             # Two results for Amazon and Google
-            result = transform(json_rpc["params"])
-            print("transformed successfully")
+            result = transform(json_rpc["param"])
             error = None
         except:
             # Errors are handled by enabling the `error` flag and returning a
