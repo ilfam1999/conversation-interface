@@ -1,5 +1,3 @@
-// (function(n){var a=Math.min,s=Math.max;var e=function(n,a,e){var s=e.length;for(var t=0;t<s;++t)n.setUint8(a+t,e.charCodeAt(t))};var t=function(t,e){this.sampleRate=t;this.numChannels=e;this.numSamples=0;this.dataViews=[]};t.prototype.encode=function(r){var t=r[0].length,u=this.numChannels,h=new DataView(new ArrayBuffer(t*u*2)),o=0;for(var e=0;e<t;++e)for(var n=0;n<u;++n){var i=r[n][e]*32767;h.setInt16(o,i<0?s(i,-32768):a(i,32767),true);o+=2}this.dataViews.push(h);this.numSamples+=t};t.prototype.finish=function(s){var n=this.numChannels*this.numSamples*2,t=new DataView(new ArrayBuffer(44));e(t,0,"RIFF");t.setUint32(4,36+n,true);e(t,8,"WAVE");e(t,12,"fmt ");t.setUint32(16,16,true);t.setUint16(20,1,true);t.setUint16(22,this.numChannels,true);t.setUint32(24,this.sampleRate,true);t.setUint32(28,this.sampleRate*4,true);t.setUint16(32,this.numChannels*2,true);t.setUint16(34,16,true);e(t,36,"data");t.setUint32(40,n,true);this.dataViews.unshift(t);var a=new Blob(this.dataViews,{type:"audio/wav"});this.cleanup();return a};t.prototype.cancel=t.prototype.cleanup=function(){delete this.dataViews};n.WavAudioEncoder=t})(self);
-
 var client = {
     queue: {},
 
@@ -9,12 +7,12 @@ var client = {
         this.socket = new WebSocket("ws://localhost:8080/websocket");
 
         this.socket.onopen = function () {
-            console.log("Connected!");
+            console.log("Connected to the server.");
         };
 
         this.socket.onmessage = function (messageEvent) {
 
-            console.log("Received msg from the server.");
+            console.log("Received response from the server.");
             var router, current, updated, jsonRpc;
 
             jsonRpc = JSON.parse(messageEvent.data);
@@ -45,57 +43,66 @@ var client = {
         });
     },
 
-    transform: function (blobUrl) {
+    transform: function (blob) {
         var uuid = this.uuid();
-        this.socket.send(JSON.stringify({method: "transform", id: uuid, params: blobUrl}));
+        //this.socket.send(JSON.stringify({method: "transform", id: uuid, param: blobUrl}));
+        this.socket.send(blob);
         this.queue[uuid] = "transform";
+        console.log("Send msg to server get the transcirpt.")
     }
 };
 
-function getBuffers(event) {
-  var buffers = [];
-  // buffers[0] = event.inputBuffer.getChannelData(0);
-  return buffers;
-}
-
 navigator.mediaDevices.getUserMedia({audio:true})
-	.then(stream => {
+ .then(stream => {
     var options = {
         mimeType : 'audio/webm'
     }
-		rec = new MediaRecorder(stream,options);
-		rec.ondataavailable = e => {
-			audioChunks.push(e.data);
-      // encoder = new WavAudioEncoder(44100, 1);
-      // encoder.encode(getBuffers(e));
-      // blob = encoder.finish([mimeType])
-			if (rec.state == "inactive"){
+    rec = new MediaRecorder(stream,options);
+    rec.ondataavailable = e => {
+      audioChunks.push(e.data);
+      if (rec.state == "inactive"){
         let blob = new Blob(audioChunks,{type:'audio/webm'});
         blob.lastModifiedDate = new Date();
-        blob.name = "audio/webm";
+        blob.name = "speech.webm";
         blobUrl = URL.createObjectURL(blob);
         var link = document.createElement("a");
         link.href = blobUrl;
-        link.download = "audio/webm";
+        link.download = "speech.webm";
         document.body.appendChild(link);
-        // link.click();
-        client.transform(blobUrl);
-        //var formData = new FormData();
-        //formData.append('audio', blob, 'speech.wav');
-        // $.ajax({
-        //     type: 'POST',
-        //     url: 'http://localhost/python/server.py',
-        //     data: formData,
-        //     processData: false,  // prevent jQuery from converting the data
-        //     contentType: false,  // prevent jQuery from overriding content type
-        //     success: function() {
-        //         alert("sent");
-        //     }
-        // });
-     }
-		}
-	})
-	.catch(e=>console.log(e));
+        link.click();
+        client.transform(blob);
+      }
+    }
+ })
+ .catch(e=>console.log(e));
+
+
+// navigator.mediaDevices.getUserMedia({audio:true})
+// 	.then(stream => {
+//     var options = {
+//         mimeType : 'audio/webm'
+//     }
+// 		rec = new MediaRecorder(stream,options);
+// 		rec.ondataavailable = e => {
+// 			audioChunks.push(e.data);
+// 			if (rec.state == "inactive"){
+//         let blob = new Blob(audioChunks,{type:'audio/webm'});
+//         blob.lastModifiedDate = new Date();
+//         blob.name = "speech.webm";
+//         blobUrl = URL.createObjectURL(blob);
+//         var link = document.createElement("a");
+//         link.href = blobUrl;
+//         link.download = "speech.webm";
+//         document.body.appendChild(link);
+//         link.click();
+//         client.transform(blobUrl);
+//      }
+// 		}
+// 	})
+// 	.catch(e=>console.log(e));
+
+
+
   
 var isPause = false;
 startRecord.disabled = false;
@@ -130,18 +137,11 @@ stopRecord.onclick = e => {
   stopRecord.disabled = true;
   rec.stop();
   isPause = false;
-  console.log("clicked stop button");
   // display the transcipt part
   //document.querySelector(".panel").style.display = "block";
   // document.getElementById("transcipt").innerHTML = "...Loading";
 }
 
-function blobToFile(theBlob, fileName){
-    //A Blob() is almost a File() - it's just missing the two properties below which we will add
-    theBlob.lastModifiedDate = new Date();
-    theBlob.name = fileName;
-    return theBlob;
-}
 
 // ----------------------------------------------------------------
 $("#nav-amazon-tab").on("click", function(){
